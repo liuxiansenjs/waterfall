@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+	<title>waterfall Layout</title>
+	<style>
+		*, *::before, *::after {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			width: 100%;
+		}
+
+		.waterfall {
+			position: relative;
+			margin: 0 auto;
+			height: 100vh;
+		}
+
+		.waterfall .item {
+			position: absolute;
+			width: 300px;
+			padding-right: 10px;
+			padding-bottom: 10px; 
+			overflow: hidden;
+			transition: all 1s ease 0s;
+		}
+
+		.waterfall .item .inner {
+			border: 1px solid #a1a1a1;
+			border-radius: 5px;
+			
+		}
+		.waterfall .item .inner img {
+			width: 100%;
+		}
+
+		.waterfall .item .inner .bottom {
+			padding: 10px;
+		}
+	</style>
+</head>
+<body>
+	<div class="waterfall">
+		<div class="item">
+			<div class="inner">
+				<img src="200657210765.png" alt="">
+				<div class="bottom">
+					<p>LoL英雄</p>
+				</div>
+			</div>
+		</div>
+		<div class="item">
+			<div class="inner">
+				<img src="200657210775.png" alt="">
+				<div class="bottom">
+					<p>LoL英雄</p>
+					<p>LoL英雄</p>
+					<p>LoL英雄</p>
+				</div>
+			</div>
+		</div>
+		<div class="item">
+			<div class="inner">
+				<img src="200657210778.png" alt="">
+				<div class="bottom">
+					<p>LoL英雄</p>
+				</div>
+			</div>
+		</div>
+		<div class="item">
+			<div class="inner">
+				<img src="200657210783.png" alt="">
+				<div class="bottom">
+					<p>LoL英雄</p>
+					<p>LoL英雄</p>
+					<p>LoL英雄</p>
+					<p>LoL英雄</p>
+					<p>LoL英雄</p>
+					<p>LoL英雄</p>
+					<p>LoL英雄</p>
+				</div>
+			</div>
+		</div>
+		<div class="item">
+			<div class="inner">
+				<img src="200657210775.png" alt="">
+				<div class="bottom">
+					<p>LoL英雄</p>
+				</div>
+			</div>
+		</div>
+		<div class="item">
+			<div class="inner">
+				<img src="200657210793.png" alt="">
+				<div class="bottom">
+					<p>LoL英雄</p>
+					<p>LoL英雄</p>
+				</div>
+			</div>
+		</div>
+		<div class="item">
+			<div class="inner">
+				<img src="200657210838.png" alt="">
+				<div class="bottom">
+					<p>LoL英雄</p>
+					<p>LoL英雄</p>
+					<p>LoL英雄</p>
+				</div>
+			</div>
+		</div>
+		<div class="item">
+			<div class="inner">
+				<img src="220014358311.png" alt="">
+				<div class="bottom">
+					<p>LoL英雄</p>
+				</div>
+			</div>
+		</div>
+		<div class="item">
+			<div class="inner">
+				<img src="226939267779.png" alt="">
+				<div class="bottom">
+					<p>LoL英雄</p>
+				</div>
+			</div>
+		</div>
+		<div class="item">
+			<div class="inner">
+				<img src="u=1381757502,2507602167&fm=58.jpeg" alt="">
+				<div class="bottom">
+					<p>日本知名女演员</p>
+				</div>
+			</div>
+		</div>
+		<div class="item">
+			<div class="inner">
+				<img src="200657210778.png" alt="">
+				<div class="bottom">
+					<p>LoL英雄</p>
+				</div>
+			</div>
+		</div>
+		<div class="item">
+			<div class="inner">
+				<img src="u=1381757502,2507602167&fm=58.jpeg" alt="">
+				<div class="bottom">
+					<p>日本知名女演员</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
+
+<script>
+	function Waterfall (ROOT) {
+		var self = this;
+		if(!ROOT instanceof HTMLElement) throw new Error('参数必须是原生的DOM元素');
+		this._root = ROOT;
+		
+		this._init();
+		this._render();
+		this._bindEvent();
+	}
+
+	Waterfall.prototype._init = function() {
+		this._itemList = [].slice.call(this._root.querySelectorAll('.item'));
+		this._itemWidth = parseInt(window.getComputedStyle(this._itemList[0]).width, 10);
+		var screenWidth = document.documentElement.offsetWidth * 0.98;
+		if (screenWidth < this._itemWidth) {
+			screenWidth = this._itemWidth;
+		}
+		if (screenWidth > 1000) {
+			screenWidth = 1000;
+		}
+		this._width = screenWidth;
+		this._columnsLength = Math.floor(this._width / this._itemWidth);
+		this._root.style.width = this._columnsLength * this._itemWidth + 'px';
+		this._map = [];
+		for (var i = 0; i < this._columnsLength; i++) {
+			this._map[i] = [];
+		}
+	}
+
+	Waterfall.prototype._render = function() {
+		var self = this;
+		setTimeout(function() {
+			self._batch();
+		}, 10);
+	}
+
+	Waterfall.prototype._calcHeight = function() {
+		var arr = [];
+		this._map.forEach(function(item) {
+			if (item.length === 0) {
+				arr.push(0);
+				return;
+			}
+			var sum = item.reduce(function(a, b) {
+				return a + b;
+			});
+			arr.push(sum);
+		});
+		return arr;
+	}
+
+	Waterfall.prototype._batch = function() {
+		for (var i = 0; i < this._itemList.length; i++) {
+			var columnHeightArray = this._calcHeight();
+			var minValue = Math.min.apply(null, columnHeightArray);
+			var index = columnHeightArray.indexOf(minValue);
+			var thisHeight = parseInt(window.getComputedStyle(this._itemList[i]).height, 10);
+			this._map[index].push(thisHeight);
+			this._itemList[i].style.left = index * this._itemWidth + 'px';
+			this._itemList[i].style.top = minValue + 'px';
+		}
+	}
+	Waterfall.prototype._bindEvent = function() {
+		var self = this;
+		// window.onresize = function(e) {
+		// 	self._init();
+		// 	self._render();
+		// }
+		setInterval(function() {
+			self._init();
+			self._render();
+		}, 1000);
+	}
+	var waterfall = new Waterfall(document.querySelector('.waterfall'))
+</script>

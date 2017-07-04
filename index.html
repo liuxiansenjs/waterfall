@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+	<title>waterfall Layout</title>
+	<style>
+		*, *::before, *::after {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			width: 100%;
+		}
+
+		.waterfall {
+			position: relative;
+			margin: 0 auto;
+			height: 100vh;
+		}
+
+		.waterfall .item {
+			position: absolute;
+			width: 300px;
+			padding-right: 10px;
+			padding-bottom: 10px; 
+			overflow: hidden;
+			transition: all 1s ease 0s;
+		}
+
+		.waterfall .item .inner {
+			border: 1px solid #a1a1a1;
+			border-radius: 5px;
+			
+		}
+		.waterfall .item .inner img {
+			width: 100%;
+		}
+
+		.waterfall .item .inner .bottom {
+			padding: 10px;
+		}
+	</style>
+	<script src="jquery-3.2.1.js"></script>
+	<script src="underscore.js"></script>
+</head>
+<body>
+	<div class="waterfall">
+		
+	</div>
+</body>
+</html>
+
+<script>
+(function() {
+	function Waterfall (ROOT) {
+		var self = this;
+		if(!ROOT instanceof HTMLElement) throw new Error('参数必须是原生的DOM元素');
+		this._root = ROOT;
+		
+		this._init();
+		this._render();
+		this._bindEvent();
+	}
+
+	Waterfall.prototype._init = function() {
+		try {
+		this._itemList = [].slice.call(this._root.querySelectorAll('.item'));
+		this._itemWidth = parseInt(window.getComputedStyle(this._itemList[0]).width, 10);
+		var screenWidth = document.documentElement.offsetWidth * 0.98;
+		if (screenWidth < this._itemWidth) {
+			screenWidth = this._itemWidth;
+		}
+		if (screenWidth > 1000) {
+			screenWidth = 1000;
+		}
+		this._width = screenWidth;
+		this._columnsLength = Math.floor(this._width / this._itemWidth);
+		this._root.style.width = this._columnsLength * this._itemWidth + 'px';
+		this._map = [];
+		for (var i = 0; i < this._columnsLength; i++) {
+			this._map[i] = [];
+		}
+		} catch (e) {};
+	}
+
+	Waterfall.prototype._render = function() {
+		var self = this;
+		setTimeout(function() {
+			self._batch();
+		}, 10);
+	}
+
+	Waterfall.prototype._calcHeight = function() {
+		var arr = [];
+		this._map.forEach(function(item) {
+			if (item.length === 0) {
+				arr.push(0);
+				return;
+			}
+			var sum = item.reduce(function(a, b) {
+				return a + b;
+			});
+			arr.push(sum);
+		});
+		return arr;
+	}
+
+	Waterfall.prototype._batch = function() {
+		for (var i = 0; i < this._itemList.length; i++) {
+			var columnHeightArray = this._calcHeight();
+			var minValue = Math.min.apply(null, columnHeightArray);
+			var index = columnHeightArray.indexOf(minValue);
+			var thisHeight = parseInt(window.getComputedStyle(this._itemList[i]).height, 10);
+			this._map[index].push(thisHeight);
+			this._itemList[i].style.left = index * this._itemWidth + 'px';
+			this._itemList[i].style.top = minValue + 'px';
+		}
+	}
+	Waterfall.prototype._bindEvent = function() {
+		var self = this;
+		setInterval(function() {
+			self._init();
+			self._render();
+		}, 200);
+	}
+	var waterfall = new Waterfall(document.querySelector('.waterfall'));
+}());
+
+(function() {
+	var page = 0, locked = false;
+	var template = _.template('<div class="item" data-id="<%= id %>"><div class="inner"><img src="<%= src %>" alt=""><div class="bottom"><p><%= details %></p></div></div></div>');
+	function foo() {
+		var i = 0;
+		if (locked) return;
+		locked = true;
+		$.get('./data', { page: page} , function(data) {
+	if (data.total === 0) {
+		locked = false;
+		return;
+	}
+	var results = JSON.parse(data).results;
+	results.forEach(function(item) {
+		var img = new Image();
+		img.src = item.src;
+		var compiled = template({
+			id: item.id,
+			src: item.src,
+			details: item.details,
+		});
+		img.onload = function() {
+			$(compiled).appendTo($('.waterfall'));
+			i++;
+			if (i === results.length - 1) {
+				setTimeout(function() {
+					locked = false;
+				}, 1000);
+			}
+		}
+	});
+});
+		page++;
+	}
+	$(document).ready(function() {
+		foo();
+	});
+	setInterval(function() {
+		var height = $(document).height();
+		var clientHeight = $(window).height();
+		var scrollTop = $(window).scrollTop();
+		if (clientHeight + scrollTop >= height * 0.95) {
+			foo();
+		}
+	}, 1000);
+	
+}());
+</script>
