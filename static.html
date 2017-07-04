@@ -180,7 +180,7 @@
 		}
 		this._width = screenWidth;
 		this._columnsLength = Math.floor(this._width / this._itemWidth);
-		this._root.style.width = this._columnsLength * (this._itemWidth + 10) + 'px';
+		this._root.style.width = this._columnsLength * (this._itemWidth + 10) + 10 + 'px';
 		this._map = [];
 		for (var i = 0; i < this._columnsLength; i++) {
 			this._map[i] = [];
