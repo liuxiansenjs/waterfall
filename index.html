@@ -115,7 +115,7 @@
 			var index = columnHeightArray.indexOf(minValue);
 			var thisHeight = parseInt(window.getComputedStyle(this._itemList[i]).height, 10);
 			this._map[index].push(thisHeight);
-			this._itemList[i].style.left = index * (this._itemWidth + 10) + 'px';
+			this._itemList[i].style.left = index * (this._itemWidth + 10) + 10 + 'px';
 			this._itemList[i].style.top = minValue + 'px';
 		}
 	}
